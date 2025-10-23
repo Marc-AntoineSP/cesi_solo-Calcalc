@@ -9,6 +9,13 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+
+    const contentType = req.headers['content-type'] ?? '';
+    const isJson = contentType.includes('application/json');
+    const POST_MAX = 1000000;
+    let size = 0;
+
     if (method === 'OPTIONS') {
         res.writeHead(204);
         res.end();
@@ -24,17 +31,40 @@ const server = http.createServer((req, res) => {
     }
 
     if (method === 'POST' && pathname === '/'){
-        console.log('POST OUI');
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-          try {
-            console.log(body);
-          }catch(e){console.error(e)}
-        });
-        res.writeHead(204);
-        res.end();
+      console.log('POST OUI');
+      if(!isJson){
+        res.writeHead(415, {"Content-Type":"application/json; charset=utf-8"});
+        res.end(JSON.stringify({data:`Unsupported type : use application/json. Used : ${contentType}`}));
         return;
+      }
+      let body = '';
+      req.on('data', chunk => {
+        size += chunk.length;
+        if(size > POST_MAX){
+          res.writeHead(413, {"Content-Type":"application/json; charset=utf-8"});
+          res.end(JSON.stringify({error:'Too large, size max 1Mo'}));
+          req.destroy();
+          return;
+        }
+        body += chunk;
+      });
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          console.log(data);
+          res.writeHead(204);
+          res.end();
+        }catch(e){
+          console.error(e);
+          res.writeHead(400, {'content-type':'application/json; charset=utf-8'});
+          res.end(JSON.stringify({error:'Invalid JSON'}));
+        }
+      });
+      req.on('error', () => {
+        res.writeHead(400, {'Content-Type':'application/json; charset=utf-8'});
+        res.end(JSON.stringify({error:'Bad request'}));
+      })
+      return;
     }
 });
 
