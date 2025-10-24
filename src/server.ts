@@ -1,6 +1,14 @@
+import ViewRender from '@lib/view.js';
 import http from 'node:http';
+import path from 'node:path';
 
 const PORT = Number(process.env.PORT || 5173);
+const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
+const view = new ViewRender({
+  viewsDir: VIEWS_DIR,
+  cache: false, // Au pire il sera jamais à true => mettre en true si prod ou .env plutar
+  globals: { ejsTest: 'test d ejs depuis global :3' },
+});
 
 const server = http.createServer(async (req, res) => {
   const { method, url } = req;
@@ -21,10 +29,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   if (method === 'GET' && pathname === '/') {
-    console.log('OUI');
-    res.writeHead(200, {
-      'content-type': 'text/html; charset=utf-8',
+    const html = await view.render('layouts/layout.ejs', 'pages/dashboard.ejs', {
+      title: 'Dahsboard',
+      ejsTest: 'ça marche ?',
     });
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    res.end(html);
     return;
   }
 

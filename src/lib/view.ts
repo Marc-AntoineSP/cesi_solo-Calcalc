@@ -23,9 +23,10 @@ export default class ViewRender {
   }
 
   async render(pathRelLayout: string, pathRelPage: string, locals: Record<string, unknown> = {}) {
+    const pageAbsolute = '/'.concat(pathRelPage.replace(/^\/+/, ''));
     const absolute = path.join(this.viewsDir, pathRelLayout);
     const data = {
-      ...this.globals, ...locals, page: pathRelPage, locals,
+      ...this.globals, ...locals, page: pageAbsolute, locals,
     };
     return ejs.renderFile(absolute, data, { ...this.baseOpts, filename: absolute });
   }
