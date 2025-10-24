@@ -2,7 +2,7 @@ import http from 'node:http';
 
 const PORT = Number(process.env.PORT || 5173);
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const { method, url } = req;
   const passedUrl = new URL(url!, `http://${req.headers.host}`);
   const { pathname } = passedUrl;
@@ -25,7 +25,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, {
       'content-type': 'text/html; charset=utf-8',
     });
-    res.end('<h1>test</h1>');
     return;
   }
 
