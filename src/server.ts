@@ -1,6 +1,7 @@
-import ViewRender from '@lib/view.js';
 import http from 'node:http';
 import path from 'node:path';
+
+import ViewRender from '@lib/view.js';
 
 const PORT = Number(process.env.PORT || 5173);
 const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
