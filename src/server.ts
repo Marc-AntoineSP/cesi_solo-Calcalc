@@ -8,7 +8,7 @@ const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
 const view = new ViewRender({
   viewsDir: VIEWS_DIR,
   cache: false, // Au pire il sera jamais à true => mettre en true si prod ou .env plutar
-  globals: { ejsTest: 'test d ejs depuis global :3' },
+  globals: { thisTest: 'test d ejs depuis global :3' },
 });
 
 const server = http.createServer(async (req, res) => {
@@ -32,7 +32,7 @@ const server = http.createServer(async (req, res) => {
   if (method === 'GET' && pathname === '/') {
     const html = await view.render('layouts/layout.ejs', 'pages/dashboard.ejs', {
       title: 'Dahsboard',
-      ejsTest: 'ça marche ?',
+      ejsTest: 'testEjs',
     });
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     res.end(html);
