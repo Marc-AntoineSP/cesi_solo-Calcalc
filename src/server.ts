@@ -1,10 +1,13 @@
 import http from 'node:http';
 import path from 'node:path';
 
+import staticServing from '@lib/static.js';
 import ViewRender from '@lib/view.js';
 
 const PORT = Number(process.env.PORT || 5173);
 const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
+
+const serveStatic = staticServing(path.resolve(process.cwd(), 'public'));
 const view = new ViewRender({
   viewsDir: VIEWS_DIR,
   cache: false, // Au pire il sera jamais à true => mettre en true si prod ou .env plutar
@@ -23,6 +26,8 @@ const server = http.createServer(async (req, res) => {
   const isJson = contentType.includes('application/json');
   const POST_MAX = 1000000;
   let size = 0;
+
+  if (await serveStatic(req, res, pathname)) return;
 
   if (method === 'OPTIONS') {
     res.writeHead(204);
