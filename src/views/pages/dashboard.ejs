@@ -1,10 +1,10 @@
 <section>
   <h1>Test ejs</h1>
-  <p> <%= ejsTest %> </p>
-  <p> <%= thisTest %> </p>
+  <p><%= ejsTest %></p>
+  <p><%= thisTest %></p>
   <div>
-    <% itemList.foreach(i =>{
-      <%- include("../components/listItem.ejs", {i.itemName, i.itemCal100}) %>
+    <% itemList.forEach((i) => { %>
+      <%- include('../components/listItem.ejs', { itemName: i.itemName, itemCal100: i.itemCal100 }) %>
     <% }) %>
   </div>
 </section>

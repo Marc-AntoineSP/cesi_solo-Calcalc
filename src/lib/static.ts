@@ -47,6 +47,7 @@ export default function staticServing(publicDir: string) {
       if (!res.headersSent) {
         res.statusCode = 500;
         res.end('Read fail');
+        return false;
       }
     });
     stream.pipe(res);
