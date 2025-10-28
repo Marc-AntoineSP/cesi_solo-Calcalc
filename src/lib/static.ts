@@ -49,6 +49,9 @@ export default function staticServing(publicDir: string) {
         res.end('Read fail');
         return false;
       }
+      res.statusCode = 500;
+      res.end('Server error');
+      return false;
     });
     stream.pipe(res);
     return true;
