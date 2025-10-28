@@ -1,10 +1,13 @@
 import http from 'node:http';
 import path from 'node:path';
 
+import { configDotenv } from 'dotenv';
+
 import staticServing from '@lib/static.js';
 import ViewRender from '@lib/view.js';
 
-const PORT = Number(process.env.PORT || 5173);
+configDotenv();
+const PORT = Number(process.env.PORT || 8000);
 const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
 
 const serveStatic = staticServing(path.resolve(process.cwd(), 'public'));
