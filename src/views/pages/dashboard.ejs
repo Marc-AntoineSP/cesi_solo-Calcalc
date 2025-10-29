@@ -1,10 +1,4 @@
-<section>
-  <h1 class="text-[red]">Test ejs</h1>
-  <p><%= ejsTest %></p>
-  <p><%= thisTest %></p>
-  <div>
-    <% itemList.forEach((i) => { %>
-      <%- include('../components/listItem.ejs', { itemName: i.itemName, itemCal100: i.itemCal100 }) %>
-    <% }) %>
-  </div>
+<section class="flex flex-col p-[1em]">
+  <%- include('../components/searchBar.ejs') %>
+  <%- include('../partials/gridContainer.ejs') %>
 </section>

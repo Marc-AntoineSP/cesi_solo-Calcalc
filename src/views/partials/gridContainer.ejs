@@ -1,0 +1,5 @@
+<section class="grid grid-cols-2 gap-2.5 border-2">
+    <% gridItemList.forEach(item => {%>
+        <%- include('../components/listItem.ejs', {itemName: item.title, itemCal100: item.cal100}) %>
+    <%});%>
+</section>

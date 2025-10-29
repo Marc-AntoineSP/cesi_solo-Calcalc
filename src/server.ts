@@ -43,9 +43,9 @@ const server = http.createServer(async (req, res) => {
         const html = await view.render('layouts/layout.ejs', 'pages/dashboard.ejs', {
           title: 'Dashboard',
           ejsTest: 'testEjs',
-          itemList: [
-            { itemName: '1', itemCal100: 100 },
-            { itemName: '2', itemCal100: 200 },
+          gridItemList: [
+            { title: 'test1', cal100: 100 },
+            { title: 'test2', cal100: 200 },
           ],
         });
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
