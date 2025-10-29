@@ -36,6 +36,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.46.2
         version: 8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
+      daisyui:
+        specifier: ^5.3.10
+        version: 5.3.10
       eslint:
         specifier: ^9.38.0
         version: 9.38.0(jiti@2.6.1)
@@ -769,6 +772,9 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  daisyui@5.3.10:
+    resolution: {integrity: sha512-vmjyPmm0hvFhA95KB6uiGmWakziB2pBv6CUcs5Ka/3iMBMn9S+C3SZYx9G9l2JrgTZ1EFn61F/HrPcwaUm2kLQ==}
 
   data-view-buffer@1.0.2:
     resolution: {integrity: sha512-EmKO5V3OLXh1rtK2wgXRansaK1/mtVdTUEiEI0W8RkvgT05kfxaH29PliLnpLP73yYO6142Q72QNa8Wx/A5CqQ==}
@@ -2358,6 +2364,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  daisyui@5.3.10: {}
 
   data-view-buffer@1.0.2:
     dependencies:

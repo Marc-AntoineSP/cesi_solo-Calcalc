@@ -3,14 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <title><%= title || 'Error title' %></title>
-    <link rel="stylesheet" href="/tailwind.css">
+    <link rel="stylesheet" href="/public/tailwind.css">
     <%- include('../partials/head') %>
   </head>
-  <body>
+  <body class="flex flex-col">
     <%- include('../partials/header') %>
     <main>
       <%- include(page, locals) %>
     </main>
-    <%- include('../partials/footer') %>
   </body>
 </html>
