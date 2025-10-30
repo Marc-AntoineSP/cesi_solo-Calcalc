@@ -3,12 +3,14 @@ import path from 'node:path';
 
 import { configDotenv } from 'dotenv';
 
+import Requests from '@lib/request.js';
 import staticServing from '@lib/static.js';
 import ViewRender from '@lib/view.js';
 
 configDotenv();
 const PORT = Number(process.env.PORT || 8000);
 const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
+const dbReq = new Requests();
 
 const serveStatic = staticServing(path.resolve(process.cwd(), 'public'));
 const view = new ViewRender({
@@ -43,10 +45,7 @@ const server = http.createServer(async (req, res) => {
         const html = await view.render('layouts/layout.ejs', 'pages/dashboard.ejs', {
           title: 'Dashboard',
           ejsTest: 'testEjs',
-          gridItemList: [
-            { title: 'test1', cal100: 100 },
-            { title: 'test2', cal100: 200 },
-          ],
+          gridItemList: await dbReq.getAllItems(),
         });
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(html);
@@ -56,6 +55,17 @@ const server = http.createServer(async (req, res) => {
         res.end('Template error');
       }
       return;
+    }
+
+    if (method === 'GET' && pathname === '/api/products') {
+      try {
+        const products = await dbReq.getAllItems();
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: false, data: products }));
+        return;
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     if (method === 'POST' && pathname === '/') {

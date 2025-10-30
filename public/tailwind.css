@@ -1241,6 +1241,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .textarea {
     @layer daisyui.component {
       border: var(--border) solid #0000;
