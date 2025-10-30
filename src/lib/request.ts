@@ -3,7 +3,7 @@ import { configDotenv } from 'dotenv';
 import { Pool } from 'pg';
 
 import QueryError from './errors/QueryError.js';
-import type { Product } from './types.js';
+import type { Product, ProductPost } from './types.js';
 
 configDotenv();
 export default class Requests {
@@ -15,11 +15,33 @@ export default class Requests {
   public async getAllItems():Promise<Product[]> {
     try {
       const res = await this._pool.query('SELECT * FROM Products');
-      console.log(res.rows[0]);
+      console.log('a');
+      console.log(res.rows);
       return res.rows;
     } catch (e) {
       console.error(e);
       throw new QueryError('Probleme de BDD');
+    }
+  }
+
+  // GET ONE PRODUCT
+  public async getOneProduct(productId:number):Promise<Product> {
+    try {
+      const res = await this._pool.query('SELECT * FROM Products WHERE id = $1::int', [productId]);
+      return res.rows[0];
+    } catch (e) {
+      console.error(e);
+      throw new QueryError(`Probleme BDD : ${QueryError.name}`);
+    }
+  }
+
+  public async addProduct(productPost:ProductPost):Promise<boolean> {
+    try {
+      await this._pool.query('INSERT INTO Products (name, description, calocent, country_id) VALUES ($1::text, $2::text, $3::int, $4::int)', [productPost.name, productPost.description, productPost.calocent, productPost.country_id]);
+      return true;
+    } catch (e) {
+      console.error(e);
+      throw new QueryError(`Probleme BDD : ${QueryError.name}`);
     }
   }
 }

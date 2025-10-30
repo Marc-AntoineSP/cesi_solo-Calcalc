@@ -1,10 +1,12 @@
-import http from 'node:http';
+import http, { ServerResponse } from 'node:http';
 import path from 'node:path';
 
 import { configDotenv } from 'dotenv';
 
 import Requests from '@lib/request.js';
+import { validatePostProduct } from '@lib/schemas/postProductSchema.js';
 import staticServing from '@lib/static.js';
+import type { Product } from '@lib/types.js';
 import ViewRender from '@lib/view.js';
 
 configDotenv();
@@ -19,11 +21,27 @@ const view = new ViewRender({
   globals: { thisTest: 'test d ejs depuis global :3' },
 });
 
+const httpOk = (res:ServerResponse, statusCode:number, data:Array<Product>|Product|null = null, ct:string = 'application/json; charset=utf-8') => {
+  res.writeHead(statusCode, { 'Content-Type': ct });
+  if (data === null) {
+    res.end();
+  } else {
+    res.end(JSON.stringify({ error: false, data }));
+  }
+};
+
+const httpFail = (res:ServerResponse, statusCode:number, reason:string, ct:string = 'application/json; charset=utf-8') => {
+  res.writeHead(statusCode, { 'Content-Type': ct });
+  res.end(JSON.stringify({ error: true, reason }));
+};
+
 const server = http.createServer(async (req, res) => {
   try {
     const { method, url } = req;
     const passedUrl = new URL(url!, `http://${req.headers.host}`);
     const { pathname } = passedUrl;
+    const slug = passedUrl.pathname.split('/').filter(Boolean);
+    console.log(slug);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -51,8 +69,7 @@ const server = http.createServer(async (req, res) => {
         res.end(html);
       } catch (err) {
         console.error('[EJS] render failed:', err);
-        res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
-        res.end('Template error');
+        httpFail(res, 500, 'Template Error');
       }
       return;
     }
@@ -60,45 +77,60 @@ const server = http.createServer(async (req, res) => {
     if (method === 'GET' && pathname === '/api/products') {
       try {
         const products = await dbReq.getAllItems();
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ error: false, data: products }));
+        httpOk(res, 200, products);
         return;
       } catch (e) {
         console.error(e);
+        httpFail(res, 500, 'Oopsie :3');
+      }
+      return;
+    }
+
+    if (method === 'GET' && pathname.startsWith('/api/products') && slug.length === 3) {
+      let productId;
+      try {
+        productId = parseInt(slug[-1]!, 10);
+        const product = await dbReq.getOneProduct(productId);
+        httpOk(res, 200, product);
+        return;
+      } catch (e) {
+        httpFail(res, 500, `Product with id ${productId}. Error : ${e}`);
+        return;
       }
     }
 
-    if (method === 'POST' && pathname === '/') {
+    if (method === 'POST' && pathname.startsWith('/api/products')) {
       if (!isJson) {
-        res.writeHead(415, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ error: `Unsupported type: ${contentType}` }));
+        httpFail(res, 415, `Unsupported type: ${contentType}`);
         return;
       }
       let body = '';
       req.on('data', (chunk) => {
         size += chunk.length;
         if (size > POST_MAX) {
-          res.writeHead(413, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ error: 'Too large, max 1MB' }));
+          httpFail(res, 413, 'Too large, max 1MB');
           req.destroy();
         } else {
           body += chunk;
         }
       });
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
           const data = JSON.parse(body);
           console.log('[POST /] data:', data);
-          res.writeHead(204);
-          res.end();
+          const schemaValidate = validatePostProduct(data);
+          if (schemaValidate.ok === false) {
+            httpFail(res, 405, 'Bad body');
+          } else {
+            await dbReq.addProduct(schemaValidate.productPost);
+            httpOk(res, 201);
+          }
         } catch {
-          res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+          httpFail(res, 400, 'Invalid JSON');
         }
       });
       req.on('error', () => {
-        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ error: 'Bad request' }));
+        httpFail(res, 400, 'Bad request');
       });
       return;
     }

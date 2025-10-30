@@ -6,10 +6,24 @@ export type Product = {
     country_id:number;
 };
 
-export type country = {
+export type Country = {
     id:number;
     name:string;
     latitude:number;
     longitude:number;
     flag:string;
 };
+
+export type ProductPost = {
+    name:string;
+    description:string;
+    calocent:number;
+    country_id:number;
+};
+
+export interface IProductPost {
+    name:string,
+    description:string,
+    calocent:number,
+    country_id:number,
+}
