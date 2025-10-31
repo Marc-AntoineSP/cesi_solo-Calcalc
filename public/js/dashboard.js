@@ -13,6 +13,8 @@ const diagAdd = document.getElementById('addModal');
 const addForm = document.getElementById('addForm');
 const addBtn = document.getElementById('addButton');
 
+const searchInput = document.getElementById('search');
+
 console.log('CACA PROUT');
 
 const escapeHtml = (s) => (String(s ?? '')
@@ -58,6 +60,17 @@ const renderCard = (p) => {
   </div>
 </article>`;
 };
+
+const nameFilter = () => {
+  const query = (searchInput.value || '').trim().toLowerCase();
+  const cards = gridContainer.querySelectorAll('article[data-id]');
+  cards.forEach((card) => {
+    const name = card.dataset.name.toLowerCase();
+    card.classList.toggle('hidden', !name.includes(query));
+  });
+};
+
+searchInput.addEventListener('input', nameFilter);
 
 gridContainer.addEventListener('click', (e) => {
   const card = e.target.closest('article[data-id]');
@@ -190,5 +203,11 @@ addForm.addEventListener('submit', async (e) => {
   const dataProduct = newProduct.data;
 
   gridContainer.insertAdjacentHTML('beforeend', renderCard(dataProduct));
+  nameFilter();
   diagAdd.close();
+});
+
+diagAdd.querySelector('[data-role="cancel"]').addEventListener('click', () => diagAdd.close());
+diagAdd.addEventListener('click', (e) => {
+  if (e.target === diagAdd) diagAdd.close(); // clic backdrop
 });
