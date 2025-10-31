@@ -80,7 +80,7 @@ formSupp.addEventListener('submit', async (e) => {
     alert(`Erreur : ${res.status}`);
     diagSupp.close();
   }
-
+  gridContainer.querySelector(`article[data-id="${id}"]`).remove();
   diagSupp.close();
 });
 
