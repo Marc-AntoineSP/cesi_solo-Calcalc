@@ -54,4 +54,14 @@ export default class Requests {
       throw new QueryError(`Probleme BDD : ${QueryError.name}`);
     }
   }
+
+  public async deleteProduct(productId:number):Promise<boolean> {
+    try {
+      await this._pool.query('DELETE FROM Products WHERE id = $1::int', [productId]);
+      return true;
+    } catch (e) {
+      console.error(e);
+      throw new QueryError(`Probleme BDD : ${QueryError.name}`);
+    }
+  }
 }
