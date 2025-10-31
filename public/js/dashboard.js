@@ -1,24 +1,34 @@
 const gridContainer = document.getElementById('gridContainer');
 const diag = document.getElementById('editModal');
 const form = document.getElementById('editForm');
+const diagSupp = document.getElementById('suppModal');
+const formSupp = document.getElementById('suppForm');
 
 gridContainer.addEventListener('click', (e) => {
-  const submitBtn = e.target.closest('button[data-action="edit"]');
-  if (submitBtn === null) return;
-
-  const card = submitBtn.closest('article');
+  const card = e.target.closest('article[data-id]');
   if (card === null) return;
-  const { id } = card.dataset;
-  const { name } = card.dataset;
-  const { description } = card.dataset;
-  const { calocent } = card.dataset;
 
-  form.elements.id.value = id;
-  form.elements.name.value = name;
-  form.elements.description.value = description;
-  form.elements.calocent.value = calocent;
+  const { id, name, description, calocent } = card.dataset;
 
-  diag.showModal();
+  if (e.target.closest('button[data-action="delete"]')) {
+    formSupp.elements.id.value = id;
+    formSupp.elements.name.value = name;
+    formSupp.elements.description.value = description;
+    formSupp.elements.calocent.value = calocent;
+
+    diagSupp.showModal();
+    return;
+  }
+
+  if (e.target.closest('button[data-action="edit"]')) {
+    form.elements.id.value = id;
+    form.elements.name.value = name;
+    form.elements.description.value = description;
+    form.elements.calocent.value = calocent;
+
+    diag.showModal();
+    return;
+  }
 });
 
 form.addEventListener('submit', async (e) => {
@@ -58,9 +68,29 @@ form.addEventListener('submit', async (e) => {
   diag.close();
 });
 
+formSupp.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = formSupp.elements.id.value;
+
+  const res = await fetch(`/api/products/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    alert(`Erreur : ${res.status}`);
+    diagSupp.close();
+  }
+
+  diagSupp.close();
+});
+
 diag.querySelector('[data-role="cancel"]').addEventListener('click', () => diag.close());
 diag.addEventListener('click', (e) => {
   if (e.target === diag) diag.close(); // clic backdrop
+});
+diagSupp.querySelector('[data-role="cancel"]').addEventListener('click', () => diagSupp.close());
+diagSupp.addEventListener('click', (e) => {
+  if (e.target === diagSupp) diagSupp.close(); // clic backdrop
 });
 
 console.log('fields in form:', [...form.elements].map((fElt) => fElt.name));
