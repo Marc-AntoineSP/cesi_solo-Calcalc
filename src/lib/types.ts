@@ -26,3 +26,5 @@ export type ProductPatch = {
     description:string,
     calocent:number,
 };
+
+export type Role = 'admin' | 'user';
