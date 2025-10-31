@@ -2,7 +2,9 @@ import { configDotenv } from 'dotenv';
 import { Pool } from 'pg';
 
 import QueryError from './errors/QueryError.js';
-import type { Country, Product, ProductPatch, ProductPost } from './types.js';
+import type {
+  Country, Product, ProductPatch, ProductPost,
+} from './types.js';
 
 configDotenv();
 export default class Requests {
@@ -34,10 +36,14 @@ export default class Requests {
     }
   }
 
-  public async addProduct(productPost:ProductPost):Promise<boolean> {
+  public async addProduct(productPost:ProductPost):Promise<Product> {
     try {
-      await this._pool.query('INSERT INTO Products (name, description, calocent, country_id) VALUES ($1::text, $2::text, $3::int, $4::int)', [productPost.name, productPost.description, productPost.calocent, productPost.country_id]);
-      return true;
+      const res = await this._pool.query(`
+      INSERT INTO Products (name, description, calocent, country_id)
+      VALUES ($1::text, $2::text, $3::int, $4::int)
+      RETURNING id, name, description, calocent, country_id
+    `, [productPost.name, productPost.description, productPost.calocent, productPost.country_id]);
+      return res.rows[0];
     } catch (e) {
       console.error(e);
       throw new QueryError(`Probleme BDD : ${QueryError.name}`);

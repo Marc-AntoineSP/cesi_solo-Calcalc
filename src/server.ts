@@ -4,11 +4,11 @@ import path from 'node:path';
 import { configDotenv } from 'dotenv';
 
 import Requests from '@lib/request.js';
+import { validatePatchProduct } from '@lib/schemas/patchProductSchema.js';
 import { validatePostProduct } from '@lib/schemas/postProductSchema.js';
 import staticServing from '@lib/static.js';
 import type { Country, Product } from '@lib/types.js';
 import ViewRender from '@lib/view.js';
-import { validatePatchProduct } from '@lib/schemas/patchProductSchema.js';
 
 configDotenv();
 const PORT = Number(process.env.PORT || 8000);
@@ -69,6 +69,7 @@ const server = http.createServer(async (req, res) => {
           title: 'Dashboard',
           ejsTest: 'testEjs',
           gridItemList: await dbReq.getAllItems(),
+          countryList: await dbReq.getAllCountries(),
         });
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(html);
@@ -142,8 +143,8 @@ const server = http.createServer(async (req, res) => {
           if (schemaValidate.ok === false) {
             httpFail(res, 405, 'Bad body');
           } else {
-            await dbReq.addProduct(schemaValidate.productPost);
-            httpOk(res, 201);
+            const product = await dbReq.addProduct(schemaValidate.productPost);
+            httpOk(res, 201, product);
           }
         } catch {
           httpFail(res, 400, 'Invalid JSON');
