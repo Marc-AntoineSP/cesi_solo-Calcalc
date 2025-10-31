@@ -21,9 +21,8 @@ export type ProductPost = {
     country_id:number;
 };
 
-export interface IProductPost {
+export type ProductPatch = {
     name:string,
     description:string,
     calocent:number,
-    country_id:number,
-}
+};

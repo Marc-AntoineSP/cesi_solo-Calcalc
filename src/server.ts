@@ -8,6 +8,7 @@ import { validatePostProduct } from '@lib/schemas/postProductSchema.js';
 import staticServing from '@lib/static.js';
 import type { Product } from '@lib/types.js';
 import ViewRender from '@lib/view.js';
+import { validatePatchProduct } from '@lib/schemas/patchProductSchema.js';
 
 configDotenv();
 const PORT = Number(process.env.PORT || 8000);
@@ -89,7 +90,7 @@ const server = http.createServer(async (req, res) => {
     if (method === 'GET' && pathname.startsWith('/api/products') && slug.length === 3) {
       let productId;
       try {
-        productId = parseInt(slug[-1]!, 10);
+        productId = parseInt(slug[2]!, 10);
         const product = await dbReq.getOneProduct(productId);
         httpOk(res, 200, product);
         return;
@@ -123,6 +124,44 @@ const server = http.createServer(async (req, res) => {
             httpFail(res, 405, 'Bad body');
           } else {
             await dbReq.addProduct(schemaValidate.productPost);
+            httpOk(res, 201);
+          }
+        } catch {
+          httpFail(res, 400, 'Invalid JSON');
+        }
+      });
+      req.on('error', () => {
+        httpFail(res, 400, 'Bad request');
+      });
+      return;
+    }
+
+    if (method === 'PATCH' && pathname.startsWith('/api/products') && slug.length === 3) {
+      if (!isJson) {
+        httpFail(res, 415, `Unsupported type: ${contentType}`);
+        return;
+      }
+      let body = '';
+      req.on('data', (chunk) => {
+        size += chunk.length;
+        if (size > POST_MAX) {
+          httpFail(res, 413, 'Too large, max 1MB');
+          req.destroy();
+        } else {
+          body += chunk;
+        }
+      });
+      req.on('end', async () => {
+        let productId;
+        try {
+          productId = parseInt(slug[2]!, 10);
+          const data = JSON.parse(body);
+          console.log('[POST /] data:', data);
+          const schemaValidate = validatePatchProduct(data);
+          if (schemaValidate.ok === false) {
+            httpFail(res, 405, 'Bad body');
+          } else {
+            await dbReq.modifyProduct(schemaValidate.productPatch, productId);
             httpOk(res, 201);
           }
         } catch {
