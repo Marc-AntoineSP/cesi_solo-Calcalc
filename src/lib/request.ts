@@ -13,7 +13,7 @@ export default class Requests {
   // GET ALL PRODUCTS
   public async getAllItems():Promise<Product[]> {
     try {
-      const res = await this._pool.query('SELECT * FROM Products');
+      const res = await this._pool.query('SELECT * FROM Products ORDER BY id ASC');
       console.log('a');
       console.log(res.rows);
       return res.rows;
