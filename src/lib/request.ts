@@ -2,7 +2,7 @@ import { configDotenv } from 'dotenv';
 import { Pool } from 'pg';
 
 import QueryError from './errors/QueryError.js';
-import type { Product, ProductPatch, ProductPost } from './types.js';
+import type { Country, Product, ProductPatch, ProductPost } from './types.js';
 
 configDotenv();
 export default class Requests {
@@ -58,6 +58,16 @@ export default class Requests {
     try {
       await this._pool.query('DELETE FROM Products WHERE id = $1::int', [productId]);
       return true;
+    } catch (e) {
+      console.error(e);
+      throw new QueryError(`Probleme BDD : ${QueryError.name}`);
+    }
+  }
+
+  public async getAllCountries():Promise<Country[]> {
+    try {
+      const res = await this._pool.query('SELECT * FROM Country ORDER BY name ASC');
+      return res.rows;
     } catch (e) {
       console.error(e);
       throw new QueryError(`Probleme BDD : ${QueryError.name}`);

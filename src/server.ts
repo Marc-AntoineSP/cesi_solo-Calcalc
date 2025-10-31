@@ -6,7 +6,7 @@ import { configDotenv } from 'dotenv';
 import Requests from '@lib/request.js';
 import { validatePostProduct } from '@lib/schemas/postProductSchema.js';
 import staticServing from '@lib/static.js';
-import type { Product } from '@lib/types.js';
+import type { Country, Product } from '@lib/types.js';
 import ViewRender from '@lib/view.js';
 import { validatePatchProduct } from '@lib/schemas/patchProductSchema.js';
 
@@ -22,7 +22,7 @@ const view = new ViewRender({
   globals: { thisTest: 'test d ejs depuis global :3' },
 });
 
-const httpOk = (res:ServerResponse, statusCode:number, data:Array<Product>|Product|null = null, ct:string = 'application/json; charset=utf-8') => {
+const httpOk = (res:ServerResponse, statusCode:number, data:Array<Product>|Product|Array<Country>|null = null, ct:string = 'application/json; charset=utf-8') => {
   res.writeHead(statusCode, { 'Content-Type': ct });
   if (data === null) {
     res.end();
@@ -53,11 +53,15 @@ const server = http.createServer(async (req, res) => {
     const POST_MAX = 1_000_000;
     let size = 0;
 
+    // OPTIONS
+
     if (method === 'OPTIONS') {
       res.writeHead(204);
       res.end();
       return;
     }
+
+    // --------------------------- GET ----------------------------
 
     if (method === 'GET' && pathname === '/') {
       try {
@@ -100,6 +104,21 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
+    if (method === 'GET' && pathname === '/api/countries') {
+      try {
+        const countries = await dbReq.getAllCountries();
+        console.log(countries);
+        httpOk(res, 200, countries);
+        return;
+      } catch (e) {
+        console.error(e);
+        httpFail(res, 500, 'Oopsie :3');
+      }
+      return;
+    }
+
+    // --------------------------- POST ---------------------------
+
     if (method === 'POST' && pathname.startsWith('/api/products')) {
       if (!isJson) {
         httpFail(res, 415, `Unsupported type: ${contentType}`);
@@ -135,6 +154,8 @@ const server = http.createServer(async (req, res) => {
       });
       return;
     }
+
+    // --------------------------- PATCH --------------------------
 
     if (method === 'PATCH' && pathname.startsWith('/api/products') && slug.length === 3) {
       if (!isJson) {
@@ -173,6 +194,8 @@ const server = http.createServer(async (req, res) => {
       });
       return;
     }
+
+    // --------------------------- DELETE -------------------------
 
     if (method === 'DELETE' && pathname.startsWith('/api/products') && slug.length === 3) {
       let productId;
