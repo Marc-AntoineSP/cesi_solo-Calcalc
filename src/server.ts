@@ -174,6 +174,19 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (method === 'DELETE' && pathname.startsWith('/api/products') && slug.length === 3) {
+      let productId;
+      try {
+        productId = parseInt(slug[2]!, 10);
+        await dbReq.deleteProduct(productId);
+        httpOk(res, 200);
+        return;
+      } catch (e) {
+        httpFail(res, 500, `Product with id ${productId}. Error : ${e}`);
+        return;
+      }
+    }
+
     const served = await serveStatic(req, res, pathname);
     if (served) return;
 

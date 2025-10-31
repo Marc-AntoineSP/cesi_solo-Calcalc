@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { configDotenv } from 'dotenv';
 import { Pool } from 'pg';
 
