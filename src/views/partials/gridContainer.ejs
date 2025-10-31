@@ -1,4 +1,5 @@
-<section class="grid grid-cols-2 gap-2.5 border-2">
+<section class="grid grid-cols-[repeat(auto-fit,minmax(25rem,1fr))] gap-4 
+border-2 border-base-300 rounded-xl p-4">
     <% gridItemList.forEach(item => {%>
         <%- include('../components/listItem.ejs', {name: item.name, calocent: item.calocent}) %>
     <%});%>

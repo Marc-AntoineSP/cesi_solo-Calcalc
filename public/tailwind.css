@@ -9,10 +9,12 @@
       "Courier New", monospace;
     --color-white: #fff;
     --spacing: 0.25rem;
+    --breakpoint-2xl: 96rem;
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
     --font-weight-bold: 700;
     --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --default-transition-duration: 150ms;
@@ -1241,9 +1243,6 @@
   .relative {
     position: relative;
   }
-  .static {
-    position: static;
-  }
   .textarea {
     @layer daisyui.component {
       border: var(--border) solid #0000;
@@ -1371,29 +1370,8 @@
       }
     }
   }
-  .input-md {
-    @layer daisyui.modifier {
-      --size: calc(var(--size-field, 0.25rem) * 10);
-      font-size: max(var(--font-size, 0.875rem), 0.875rem);
-      &[type="number"] {
-        &::-webkit-inner-spin-button {
-          margin-block: calc(0.25rem * -3);
-          margin-inline-end: calc(0.25rem * -3);
-        }
-      }
-    }
-  }
-  .input-sm {
-    @layer daisyui.modifier {
-      --size: calc(var(--size-field, 0.25rem) * 8);
-      font-size: max(var(--font-size, 0.75rem), 0.75rem);
-      &[type="number"] {
-        &::-webkit-inner-spin-button {
-          margin-block: calc(0.25rem * -2);
-          margin-inline-end: calc(0.25rem * -3);
-        }
-      }
-    }
+  .mx-auto {
+    margin-inline: auto;
   }
   .input-xl {
     @layer daisyui.modifier {
@@ -1402,18 +1380,6 @@
       &[type="number"] {
         &::-webkit-inner-spin-button {
           margin-block: calc(0.25rem * -4);
-          margin-inline-end: calc(0.25rem * -3);
-        }
-      }
-    }
-  }
-  .input-xs {
-    @layer daisyui.modifier {
-      --size: calc(var(--size-field, 0.25rem) * 6);
-      font-size: max(var(--font-size, 0.6875rem), 0.6875rem);
-      &[type="number"] {
-        &::-webkit-inner-spin-button {
-          margin-block: calc(0.25rem * -1);
           margin-inline-end: calc(0.25rem * -3);
         }
       }
@@ -1531,30 +1497,11 @@
   .aspect-square {
     aspect-ratio: 1 / 1;
   }
-  .size-4 {
-    width: calc(var(--spacing) * 4);
-    height: calc(var(--spacing) * 4);
-  }
-  .h-1 {
-    height: calc(var(--spacing) * 1);
-  }
-  .h-2 {
-    height: calc(var(--spacing) * 2);
-  }
-  .h-4 {
-    height: calc(var(--spacing) * 4);
-  }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
-  }
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
   .h-\[1em\] {
     height: 1em;
-  }
-  .h-\[10px\] {
-    height: 10px;
   }
   .w-1 {
     width: calc(var(--spacing) * 1);
@@ -1562,11 +1509,11 @@
   .w-1\/2 {
     width: calc(1/2 * 100%);
   }
-  .w-4 {
-    width: calc(var(--spacing) * 4);
-  }
   .w-full {
     width: 100%;
+  }
+  .max-w-screen-2xl {
+    max-width: var(--breakpoint-2xl);
   }
   .flex-1 {
     flex: 1;
@@ -1603,6 +1550,15 @@
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .grid-cols-\[repeat\(auto-fit\,minmax\(16rem\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(16rem,1fr));
+  }
+  .grid-cols-\[repeat\(auto-fit\,minmax\(20rem\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(20rem,1fr));
+  }
+  .grid-cols-\[repeat\(auto-fit\,minmax\(25rem\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(25rem,1fr));
+  }
   .flex-col {
     flex-direction: column;
   }
@@ -1617,6 +1573,9 @@
   }
   .justify-center {
     justify-content: center;
+  }
+  .justify-end {
+    justify-content: flex-end;
   }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
@@ -1633,6 +1592,9 @@
   .rounded-lg {
     border-radius: var(--radius-lg);
   }
+  .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
@@ -1640,6 +1602,12 @@
   .border-2 {
     border-style: var(--tw-border-style);
     border-width: 2px;
+  }
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+  .border-base-300 {
+    border-color: var(--color-base-300);
   }
   .bg-base-100 {
     background-color: var(--color-base-100);
@@ -1650,20 +1618,23 @@
   .bg-base-300 {
     background-color: var(--color-base-300);
   }
-  .fill-white {
-    fill: var(--color-white);
-  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
   .p-2\.5 {
     padding: calc(var(--spacing) * 2.5);
   }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
   .p-\[1em\] {
     padding: 1em;
   }
-  .p-\[2em\] {
-    padding: 2em;
+  .px-4 {
+    padding-inline: calc(var(--spacing) * 4);
+  }
+  .py-6 {
+    padding-block: calc(var(--spacing) * 6);
   }
   .text-4xl {
     font-size: var(--text-4xl);
@@ -1675,9 +1646,6 @@
   }
   .text-wrap {
     text-wrap: wrap;
-  }
-  .text-\[red\] {
-    color: red;
   }
   .underline {
     text-decoration-line: underline;
@@ -1715,6 +1683,16 @@
     @layer daisyui.modifier.color {
       --btn-color: var(--color-secondary);
       --btn-fg: var(--color-secondary-content);
+    }
+  }
+  .md\:px-6 {
+    @media (width >= 48rem) {
+      padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+  .lg\:px-8 {
+    @media (width >= 64rem) {
+      padding-inline: calc(var(--spacing) * 8);
     }
   }
 }
