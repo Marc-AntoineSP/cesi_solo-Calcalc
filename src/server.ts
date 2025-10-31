@@ -1,11 +1,20 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable consistent-return */
+/* eslint-disable max-len */
 import http, { ServerResponse } from 'node:http';
 import path from 'node:path';
 
+import bcrypt from 'bcrypt';
 import { configDotenv } from 'dotenv';
+import { Pool } from 'pg';
 
 import Requests from '@lib/request.js';
 import { validatePatchProduct } from '@lib/schemas/patchProductSchema.js';
 import { validatePostProduct } from '@lib/schemas/postProductSchema.js';
+import {
+  clearSessionCookie,
+  COOKIE, createSession, destroySession, getSession, makeSessionCookie, parseCookies,
+} from '@lib/sessionHelper.js';
 import staticServing from '@lib/static.js';
 import type { Country, Product } from '@lib/types.js';
 import ViewRender from '@lib/view.js';
@@ -16,6 +25,9 @@ const VIEWS_DIR = path.resolve(process.cwd(), 'src/views');
 const dbReq = new Requests();
 
 const serveStatic = staticServing(path.resolve(process.cwd(), 'public'));
+const pool = new Pool({ connectionString: process.env.PGCONNSTRING });
+pool.on('error', (e) => console.error('[pg pool error]', e));
+
 const view = new ViewRender({
   viewsDir: VIEWS_DIR,
   cache: false, // Au pire il sera jamais à true => mettre en true si prod ou .env plutar
@@ -36,13 +48,45 @@ const httpFail = (res:ServerResponse, statusCode:number, reason:string, ct:strin
   res.end(JSON.stringify({ error: true, reason }));
 };
 
+const redirect = (res: http.ServerResponse, location: string, cookies: string[] = []) => {
+  if (cookies.length) res.setHeader('Set-Cookie', cookies);
+  res.statusCode = 302;
+  res.setHeader('Location', location);
+  res.end();
+};
+
+const readForm = (req: http.IncomingMessage): Promise<Record<string, string>> => new Promise((resolve, reject) => {
+  let body = '';
+  req.setEncoding('utf8');
+  req.on('data', (chunk) => { body += chunk; });
+  req.on('end', () => {
+    const obj = Object.fromEntries(new URLSearchParams(body)) as Record<string, string>;
+    resolve(obj);
+  });
+  req.on('error', reject);
+});
+
 const server = http.createServer(async (req, res) => {
   try {
     const { method, url } = req;
     const passedUrl = new URL(url!, `http://${req.headers.host}`);
     const { pathname } = passedUrl;
     const slug = passedUrl.pathname.split('/').filter(Boolean);
+
     console.log(slug);
+
+    const cookies = parseCookies(req.headers.cookie);
+    const sid = cookies[COOKIE];
+    const user = await getSession(pool, sid);
+
+    const isPublic = pathname === '/login'
+      || pathname === '/register'
+      || pathname.startsWith('/public/')
+      || pathname === '/favicon.ico';
+
+    if (!user && !isPublic) {
+      return redirect(res, '/login');
+    }
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
@@ -61,11 +105,76 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // --------------------------- AUTH ---------------------------
+    if (method === 'GET' && pathname === '/login') {
+      if (user) { return redirect(res, '/admin'); }
+      const html = await view.render('layouts/layout.ejs', 'pages/login.ejs', {
+        user,
+        title: 'Login',
+        countryList: [],
+        gridItemList: [],
+      });
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      return res.end(html);
+    }
+
+    if (method === 'POST' && pathname === '/login') {
+      const form = await readForm(req);
+      const { username = '', password = '' } = form;
+
+      const q = 'SELECT id, username, role, hash_password FROM users WHERE username = $1 LIMIT 1';
+      const { rows } = await pool.query(q, [username]);
+      const row = rows[0];
+      if (!row) return redirect(res, '/login');
+
+      const ok = await bcrypt.compare(password, row.hash_password);
+      if (!ok) return redirect(res, '/login');
+
+      if (sid) await destroySession(pool, sid);
+
+      const { sid: newSid } = await createSession(pool, row.id);
+      const setCookie = makeSessionCookie(newSid);
+      return redirect(res, '/admin', [setCookie]);
+    }
+
+    if (method === 'POST' && pathname === '/register') {
+      const form = await readForm(req);
+      const { username = '', password = '' } = form;
+      if (!username || !password) return redirect(res, '/login');
+
+      const hash = await bcrypt.hash(password, 12);
+      const role: 'admin' | 'user' = /^(on|true|1)$/i.test(form.is_admin ?? '') ? 'admin' : 'user';
+      const ins = 'INSERT INTO users (username, hash_password, role) VALUES ($1,$2,$3) RETURNING id';
+      const { rows } = await pool.query(ins, [username, hash, role]);
+      const userId = rows[0].id;
+
+      const { sid: newSid } = await createSession(pool, userId);
+      const setCookie = makeSessionCookie(newSid);
+      return redirect(res, '/', [setCookie]);
+    }
+
+    if (method === 'POST' && pathname === '/logout') {
+      if (sid) await destroySession(pool, sid);
+      const clear = clearSessionCookie();
+      return redirect(res, '/login', [clear]);
+    }
+
+    if (method === 'GET' && pathname === '/admin') {
+      if (!user) return redirect(res, '/login');
+      return redirect(res, '/');
+    }
     // --------------------------- GET ----------------------------
 
     if (method === 'GET' && pathname === '/') {
       try {
+        if (!user) return redirect(res, '/login');
+        if (user.role !== 'admin') {
+          const html = await view.render('layouts/layout.ejs', 'pages/errors/forbidden.ejs', { title: 'Accès refusé', user });
+          res.setHeader('content-type', 'text/html; charset=utf-8');
+          return res.end(html);
+        }
         const html = await view.render('layouts/layout.ejs', 'pages/dashboard.ejs', {
+          user,
           title: 'Dashboard',
           ejsTest: 'testEjs',
           gridItemList: await dbReq.getAllItems(),

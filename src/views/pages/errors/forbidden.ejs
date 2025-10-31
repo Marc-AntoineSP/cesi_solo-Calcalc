@@ -1,0 +1,27 @@
+<section class="min-h-[60vh] flex items-center justify-center px-4">
+  <div class="max-w-xl w-full">
+    <div class="card bg-base-200 shadow-xl">
+      <div class="card-body items-center text-center">
+        <div class="mb-2 text-5xl">🔒</div>
+        <h1 class="card-title text-2xl">Accès refusé</h1>
+        <p class="opacity-80">
+          Désolé <%= user?.username || '' %>, cette zone est réservée aux administrateurs.
+        </p>
+
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+          <a href="/" class="btn btn-outline w-full">Retour à l’accueil</a>
+          <a href="/login" class="btn w-full">Se connecter en admin</a>
+          <form method="POST" action="/logout" class="w-full">
+            <button type="submit" class="btn btn-ghost w-full">Se déconnecter</button>
+          </form>
+        </div>
+
+        <div class="divider my-4"></div>
+
+        <p class="text-sm opacity-70">
+          Code: <span class="badge badge-error">403</span> — Vous devez disposer du rôle <code>admin</code>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

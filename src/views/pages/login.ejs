@@ -1,0 +1,24 @@
+<!-- LOGIN -->
+<form method="POST" action="/login" class="flex flex-col gap-2 max-w-sm">
+  <input name="username" placeholder="username" required class="input input-bordered" />
+  <input name="password" type="password" placeholder="password" required class="input input-bordered" />
+  <button type="submit" class="btn btn-primary">Se connecter</button>
+</form>
+
+<form method="POST" action="/register" class="flex flex-col gap-2 max-w-sm mt-6">
+  <input name="username" placeholder="nouveau username" required class="input input-bordered" />
+  <input name="password" type="password" placeholder="nouveau mot de passe" required class="input input-bordered" />
+
+  <label class="label cursor-pointer justify-start gap-3">
+    <input type="checkbox" name="is_admin" class="checkbox" />
+    <span class="label-text">Créer en tant qu’admin</span>
+  </label>
+
+  <button type="submit" class="btn">Créer un compte</button>
+</form>
+
+<% if (typeof user !== 'undefined' && user) { %>
+  <form method="POST" action="/logout" class="mt-6">
+    <button type="submit" class="btn btn-outline">Se déconnecter</button>
+  </form>
+<% } %>

@@ -2,7 +2,10 @@
     <p class="navbar-start"></p>
     <h1 class="navbar-center font-bold text-4xl">Dashboard</h1>
     <div class="navbar-end flex gap-2.5">
-        <p>Admin</p>
+        <p><%= user.username %></p>
         <img src="/public/Avatar.png" class="h-16 aspect-square"/>
+        <form method="POST" action="/logout">
+        <button type="submit" class="btn btn-outline btn-sm">Déconnexion</button>
+      </form>
     </div>
 </nav>

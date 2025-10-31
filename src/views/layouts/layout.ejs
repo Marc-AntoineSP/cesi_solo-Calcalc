@@ -10,65 +10,6 @@
   <%- include('../partials/header') %>
   <main class="mx-auto w-full max-w-screen-2xl px-4 md:px-6 lg:px-8 py-6">
     <%- include(page, locals) %>
-    <dialog id="editModal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Modifier</h3>
-        <form id="editForm" class="flex flex-col gap-3">
-          <input type="hidden" name="id" />
-          <label>Nom <input name="name" class="input input-bordered" /></label>
-          <label>Description <textarea name="description" class="input input-bordered" ></textarea></label>
-          <label>Calories/100g <input name="calocent" type="number" step="1" class="input input-bordered" /></label>
-          <div class="modal-action">
-            <button type="button" class="btn" data-role="cancel">Annuler</button>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-          </div>
-        </form>
-      </div>
-    </dialog>
-    
-    <dialog id="suppModal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Suppression</h3>
-        <form id="suppForm" class="flex flex-col gap-3">
-          <input type="hidden" name="id" aria-hidden="true"/>
-          <label>Nom <input name="name" class="input input-bordered"  readonly/></label>
-          <label>Description <textarea name="description" class="input input-bordered"  readonly></textarea></label>
-          <label>Calories/100g <input name="calocent" type="number" step="1" class="input input-bordered" readonly/></label>
-          <div class="modal-action">
-            <button type="button" class="btn" data-role="cancel">Annuler</button>
-            <button type="submit" class="btn btn-primary" data-role="delete">Supprimer</button>
-          </div>
-        </form>
-      </div>
-    </dialog>
-    
-    <dialog id="addModal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Ajouter</h3>
-        <form id="addForm" class="flex flex-col gap-3">
-          <label>Nom
-            <input name="name" class="input input-bordered" />
-          </label>
-          <label>Description
-            <textarea name="description" class="textarea textarea-bordered"></textarea>
-          </label>
-          <label>Calories/100g
-            <input name="calocent" type="number" step="1" class="input input-bordered" />
-          </label>
-          <label>Pays
-            <select name="pays_id" class="select select-bordered">
-              <% (countryList || []).forEach(c => { %>
-                <option value="<%= c.id %>"><%= c.name %></option>
-                <% }) %>
-              </select>
-            </label>
-            <div class="modal-action">
-              <button type="button" class="btn" data-role="cancel">Annuler</button>
-              <button type="submit" class="btn btn-primary">Ajouter</button>
-            </div>
-          </form>
-        </div>
-      </dialog>
     </main>
   </body>
   </html>
